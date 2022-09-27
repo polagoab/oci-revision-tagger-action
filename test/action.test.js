@@ -10,26 +10,30 @@ const runAction = require('../src/action');
 
 describe(`Single image tests`, () => {
     const digest = 'sha256:42'
+    const image = 'unknown-image:1.0.0'
+    const revision = '1.0.0-001'
+    const revisionImage = 'unknown-image:1.0.0-001'
+    const revisionImage2 = 'unknown-image:1.0.0-002'
 
     beforeEach(() => {
         jest.resetModules();
     });
 
-    test("Singe image with no existing digest", async () => {
+    test("Singe image with no input digest", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', digest: undefined })
+            .setInputs({ image: image, digest: undefined })
 
         child_process.exec.mockImplementation((command, callback) => {
             if (command.includes('skopeo inspect')) {
-                expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+                expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
                 callback(null, { stdout: digest });
             } else if (command.includes('skopeo list-tags')) {
-                expect(command).toBe("skopeo list-tags docker://unknown-image")
+                expect(command).toBe("skopeo list-tags docker://" + image.split(':')[0])
                 callback(null, { stdout: JSON.stringify({ Tags: ['1.0.0'] }) });
             } else if (command.includes('docker buildx imagetools create')) {
-                expect(command).toBe("docker buildx imagetools create unknown-image:1.0.0 --tag unknown-image:1.0.0-001")
-                callback(null, { stdout: 'unknown-image:1.0.0-001' });
+                expect(command).toBe("docker buildx imagetools create " + image + " --tag " + revisionImage)
+                callback(null, { stdout: '' });
             } else {
                 fail("Unrecognized exec call: " + command)
             }
@@ -38,16 +42,17 @@ describe(`Single image tests`, () => {
         const result = await target.run(options)
 
         expect(result.isSuccess)
-        expect(result.commands.outputs.revision).toBe('1.0.0-001')
+        expect(result.commands.outputs.digest).toBeUndefined
+        expect(result.commands.outputs.revision).toBe(revision)
     })
 
-    test("Single image with same digest", async () => {
+    test("Single image with unchanged digest", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', digest: digest })
+            .setInputs({ image: image, digest: digest })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+            expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
             callback(null, { stdout: digest });
         });
 
@@ -58,21 +63,21 @@ describe(`Single image tests`, () => {
         expect(result.commands.outputs.revision).toBeUndefined()
     })
 
-    test("Single image with different digest", async () => {
+    test("Single image with updated digest", async () => {
         const updatedDigest = 'sha256:43'
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', digest: digest })
+            .setInputs({ image: image, digest: digest })
 
         child_process.exec.mockImplementation((command, callback) => {
             if (command.includes('skopeo inspect')) {
-                expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+                expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
                 callback(null, { stdout: updatedDigest });
             } else if (command.includes('skopeo list-tags')) {
-                expect(command).toBe("skopeo list-tags docker://unknown-image")
+                expect(command).toBe("skopeo list-tags docker://" + image.split(':')[0])
                 callback(null, { stdout: JSON.stringify({ Tags: ['1.0.0', '1.0.0-001'] }) });
             } else if (command.includes('docker buildx imagetools create')) {
-                expect(command).toBe("docker buildx imagetools create unknown-image:1.0.0 --tag unknown-image:1.0.0-001")
+                expect(command).toBe("docker buildx imagetools create " + image + " --tag " + revisionImage2)
                 callback(null, { stdout: '' });
             } else {
                 fail("Unrecognized exec call: " + command)
@@ -89,10 +94,10 @@ describe(`Single image tests`, () => {
     test("Single image with os input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', os: 'linux' })
+            .setInputs({ image: image, os: 'linux' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-os=linux inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+            expect(command).toBe("skopeo --override-os=linux inspect --format '{{.Digest}}' docker://" + image)
             callback(null, { stdout: digest });
         });
 
@@ -105,10 +110,10 @@ describe(`Single image tests`, () => {
     test("Single image with arch input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', arch: 'x86' })
+            .setInputs({ image: image, arch: 'x86' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-arch=x86 inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+            expect(command).toBe("skopeo --override-arch=x86 inspect --format '{{.Digest}}' docker://" + image)
             callback(null, { stdout: digest });
         });
 
@@ -121,10 +126,10 @@ describe(`Single image tests`, () => {
     test("Single image with variant input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: 'unknown-image:1.0.0', variant: 'v6' })
+            .setInputs({ image: image, variant: 'v6' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-variant=v6 inspect --format '{{.Digest}}' docker://unknown-image:1.0.0")
+            expect(command).toBe("skopeo --override-variant=v6 inspect --format '{{.Digest}}' docker://" + image)
             callback(null, { stdout: digest });
         });
 
