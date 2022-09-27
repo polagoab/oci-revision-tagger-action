@@ -1,0 +1,31 @@
+{
+  "name": "oci-revision-tagger-action",
+  "version": "1.0.0",
+  "description": "Github Action that adds a revision tag to images in a container registry",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles",
+    "build": "npx ncc build index.js --license licenses.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/polagoab/oci-digest-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/polagoab/oci-digest-action/issues"
+  },
+  "homepage": "https://github.com/polagoab/oci-digest-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.9.1",
+    "@actions/github": "^5.0.3",
+    "github-action-ts-run-api": "^2.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.2",
+    "@vercel/ncc": "^0.34.0",
+    "jest": "^29.0.3"
+  }
+}

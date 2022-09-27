@@ -1,0 +1,24 @@
+name: 'oci-revision-tagger-action'
+description: 'Github Action that adds a revision tag to images in a container registry'
+inputs:
+  image:
+    description: 'The image to process'
+    required: true
+  digest:
+    description: 'The digest of the given image or empty if the current version does not exists'
+    required: true
+  os:
+    description: 'The OS to use instead of the running OS for choosing images'
+    required: false
+  arch:
+    description: 'The ARCH to use instead of the architecture of the machine for choosing images'
+    required: false
+  variant:
+    description: 'The VARIANT to use instead of the running architecture variant for choosing images'
+    required: false
+outputs:
+  revision:
+    description: 'The new revision tag or empty if no new revision was created'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
