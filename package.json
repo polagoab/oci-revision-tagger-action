@@ -12,7 +12,7 @@
     "url": "git+https://github.com/polagoab/oci-digest-action.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Polago AB",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/polagoab/oci-digest-action/issues"
