@@ -35,7 +35,7 @@ describe(`Single image tests`, () => {
         jest.resetModules();
     });
 
-    test("Singe image with no input digest", async () => {
+    test("Single image with no input digest", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
             .setInputs({ image: image, digest: undefined })
@@ -62,7 +62,7 @@ describe(`Single image tests`, () => {
         expect(result.commands.outputs.revision).toBe(revision)
     })
 
-    test("Singe image with no input digest and no existing digest", async () => {
+    test("Single image with no input digest and no existing digest", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
             .setInputs({ image: image, digest: undefined })
