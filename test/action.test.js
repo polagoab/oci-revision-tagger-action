@@ -41,8 +41,8 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
-        expect(result.commands.outputs.digest).toBeUndefined
+        expect(result.isSuccess).toBeTruthy()
+        expect(result.commands.outputs.digest).toBe(digest)
         expect(result.commands.outputs.revision).toBe(revision)
     })
 
@@ -58,7 +58,7 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
+        expect(result.isSuccess).toBeTruthy()
         expect(result.commands.outputs.digest).toBe(digest)
         expect(result.commands.outputs.revision).toBeUndefined()
     })
@@ -86,7 +86,7 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
+        expect(result.isSuccess).toBeTruthy()
         expect(result.commands.outputs.digest).toBe(updatedDigest)
         expect(result.commands.outputs.revision).toBe('1.0.0-002')
     })
@@ -103,7 +103,7 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
+        expect(result.isSuccess).toBeTruthy()
         expect(result.commands.outputs.digest).toBe(digest)
     })
 
@@ -119,7 +119,7 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
+        expect(result.isSuccess).toBeTruthy()
         expect(result.commands.outputs.digest).toBe(digest)
     })
 
@@ -135,7 +135,7 @@ describe(`Single image tests`, () => {
 
         const result = await target.run(options)
 
-        expect(result.isSuccess)
+        expect(result.isSuccess).toBeTruthy()
         expect(result.commands.outputs.digest).toBe(digest)
     })
 
