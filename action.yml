@@ -7,6 +7,9 @@ inputs:
   digest:
     description: 'The digest of the given image or empty if the current version does not exists'
     required: true
+  strategy:
+    description: 'The revision strategy to use. Valid strategies are alphabetical or numerical. Default is numerical.'
+    required: false
   os:
     description: 'The OS to use instead of the running OS for choosing images'
     required: false

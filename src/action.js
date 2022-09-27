@@ -50,7 +50,23 @@ async function digestForImage(image, os, arch, variant) {
     }
 }
 
-async function revisionForImage(image) {
+function paddingFromStrategy(strategy) {
+    const parts = strategy.split(':')
+
+    if (strategy === '' || parts[0] === 'numerical') {
+        return 0
+    } else if (parts[0] === 'alphabetical') {
+        if (parts[1] === undefined) {
+            return 3
+        } else if (!isNaN(parts[1])) {
+            return parts[1]
+        }
+        throw new Error("Unrecognized alphabetical padding: " + parts[1])
+    }
+    throw new Error("Unrecognized strategy: " + strategy)
+}
+
+async function revisionForImage(image, strategy) {
     const parts = image.split(':')
     const plainImage = parts[0]
     const version = parts[1]
@@ -73,7 +89,8 @@ async function revisionForImage(image) {
         if (tags.length === 0) {
             throw new Error("No version tag found for image: " + image)
         } else {
-            return version + '-' + String(tags.length).padStart(3, '0')
+
+            return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
         }
         return stdout.trim()
     } catch (e) {
@@ -100,14 +117,14 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
     }
 }
 
-async function action(image, digest, os, arch, variant) {
+async function action(image, digest, strategy, os, arch, variant) {
     const newDigest = await digestForImage(image, os, arch, variant)
     if (newDigest === '') {
         throw new Error("No existing digest found for image: " + image)
     }
     core.setOutput('digest', newDigest)
     if (newDigest !== digest) {
-        const revision = await revisionForImage(image)
+        const revision = await revisionForImage(image, strategy)
         await tagRevision(image, revision)
         core.setOutput('revision', revision)
     }
@@ -117,10 +134,11 @@ async function runAction() {
     try {
         const image = core.getInput('image');
         const digest = core.getInput('digest');
+        const strategy = core.getInput('strategy');
         const os = core.getInput('os');
         const arch = core.getInput('arch');
         const variant = core.getInput('variant');
-        await action(image, digest, os, arch, variant)
+        await action(image, digest, strategy, os, arch, variant)
     } catch (error) {
         core.setFailed(error.message);
     }

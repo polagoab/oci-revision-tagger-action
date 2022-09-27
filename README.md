@@ -51,6 +51,11 @@ With the strategy outlined above, the revision tag will be treated as an immutab
 
 **Required** The digest of the given image or empty if the current version does not exists.
 
+### `strategy`
+
+The revision strategy to use. Valid values are `alphabetical:PADDING` or `numerical`. The numerical strategy will create a new revision by appending the revision number as a last part of the revision. creating a revision like 
+`1.0.0-1` and the 10:th revision will be `1.0.0-10`. The alphabetical strategy requires a padding parameter that is used to pad the revision to ensure that the revision can be alphabetical compared when selecting the *latest* revision. For example, when using strategy `alphabetical:3`, the revision for version `1.0.0` will be `1.0.0-001` and the 10:th revision will be `1.0.0-010`. If no alphabetical padding is specified, 3 will be used. Default strategy is `numerical.
+
 ### `os`
 
 The OS to use instead of the running OS for choosing images.
