@@ -1,6 +1,6 @@
-# Test this github action
+# Build this github action
 
-name: Test
+name: Build
 
 on:
   push:
