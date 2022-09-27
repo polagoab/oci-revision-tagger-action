@@ -46,6 +46,22 @@ describe(`Single image tests`, () => {
         expect(result.commands.outputs.revision).toBe(revision)
     })
 
+    test("Singe image with no input digest and no existing digest", async () => {
+        const target = RunTarget.asyncFn(runAction);
+        const options = RunOptions.create()
+            .setInputs({ image: image, digest: undefined })
+
+        child_process.exec.mockImplementation((command, callback) => {
+            expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
+            callback(null, { stdout: '' });
+        });
+
+        const result = await target.run(options)
+
+        expect(result.isSuccess).toBe(false)
+    })
+
+
     test("Single image with unchanged digest", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()

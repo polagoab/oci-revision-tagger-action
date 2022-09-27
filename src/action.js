@@ -86,6 +86,9 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
 
 async function action(image, digest, os, arch, variant) {
     const newDigest = await digestForImage(image, os, arch, variant)
+    if (newDigest === '') {
+        throw new Error("No existing digest found for image: " + image)
+    }
     core.setOutput('digest', newDigest)
     if (newDigest !== digest) {
         const revision = await revisionForImage(image)
