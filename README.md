@@ -71,7 +71,11 @@ The VARIANT to use instead of the running architecture variant for choosing imag
 
 ### `revision`
 
-The new revision tag or empty if no new revision was created'
+The new revision tag or empty if no new revision was created
+
+### `digest`
+
+The digest of the image
 
 ## Example usage for a single image
 

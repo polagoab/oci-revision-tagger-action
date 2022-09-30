@@ -22,6 +22,8 @@ inputs:
 outputs:
   revision:
     description: 'The new revision tag or empty if no new revision was created'
+  digest:
+    description: 'The digest of the image'
 runs:
   using: 'node16'
   main: 'dist/index.js'
