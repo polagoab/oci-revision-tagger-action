@@ -88,5 +88,5 @@ The new revision tag or empty if no new revision was created'
   uses: polagoab/oci-revision-tagger-action@main
   with:
     image: example-image:1.0.0
-    digest: ${{ steps.existing_digest.outputs.digest}}
+    digest: ${{ steps.existing_digest.outputs.digest }}
 ```
