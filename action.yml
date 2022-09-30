@@ -5,7 +5,7 @@ inputs:
     description: 'The image to process'
     required: true
   digest:
-    description: 'The digest of the given image or empty if the current version does not exists'
+    description: 'The digest of the given image or empty if the version did not exists before the build'
     required: true
   strategy:
     description: 'The revision strategy to use. Valid strategies are alphabetical or numerical. Default is numerical.'
