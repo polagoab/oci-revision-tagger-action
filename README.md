@@ -77,8 +77,16 @@ The new revision tag or empty if no new revision was created'
 ## Example usage for a single image
 
 ```
-uses: polagoab/oci-revision-tagger-action@v1
-with:
-  image: 'ubuntu:latest'
-  digest: 'sha256:42'
+- name: Determine existing digest
+  id: existing_digest
+  uses: polagoab/oci-digest-action@main
+  with:
+    image: example-image:1.0.0
+- name: Build image
+  run: ...
+- name: Tag revision
+  uses: polagoab/oci-revision-tagger-action@main
+  with:
+    image: example-image:1.0.0
+    digest: ${{ steps.existing_digest.outputs.digest}}
 ```
