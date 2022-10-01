@@ -38,14 +38,14 @@ async function digestForImage(image, os, arch, variant) {
     cmd += " inspect --format '{{.Digest}}' "
     cmd += 'docker://' + image
 
-    console.debug('Using skopeo command: ' + cmd)
+    core.debug('Using skopeo command: ' + cmd)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        console.debug(`skopeo result: ${stdout}`)
+        core.debug(`skopeo result: ${stdout}`)
         return stdout.trim()
     } catch (e) {
-        console.log(`stderr: ${e.message}`)
+        core.debug(`stderr: ${e.message}`)
         return ''
     }
 }
@@ -78,11 +78,11 @@ async function revisionForImage(image, strategy) {
     let cmd = 'skopeo list-tags '
     cmd += 'docker://' + plainImage
 
-    console.debug('Using skopeo command: ' + cmd)
+    core.debug('Using skopeo command: ' + cmd)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        console.debug(`skopeo result: ${stdout}`)
+        core.debug(`skopeo result: ${stdout}`)
 
         const result = JSON.parse(stdout)
         const tags = result.Tags.filter(tag => tag.startsWith(version)).sort()
@@ -94,25 +94,25 @@ async function revisionForImage(image, strategy) {
         }
         return stdout.trim()
     } catch (e) {
-        console.log(`stderr: ${e.message}`)
+        core.debug(`stderr: ${e.message}`)
         return ''
     }
 }
 
 async function tagRevision(image, revision, digest, os, arch, variant) {
-    console.debug(`tagging image ${image} with revision ${revision}`)
+    core.debug(`tagging image ${image} with revision ${revision}`)
     let cmd = 'docker buildx imagetools create '
     cmd += image
     cmd += ' --tag ' + image.split(':')[0] + ':' + revision
 
-    console.debug('Using docker command: ' + cmd)
+    core.debug('Using docker command: ' + cmd)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        console.debug(`docker result: ${stdout}`)
+        core.debug(`docker result: ${stdout}`)
         return stdout.trim()
     } catch (e) {
-        console.log(`stderr: ${e.message}`)
+        core.debug(`stderr: ${e.message}`)
         return ''
     }
 }
@@ -126,7 +126,10 @@ async function action(image, digest, strategy, os, arch, variant) {
     if (newDigest !== digest) {
         const revision = await revisionForImage(image, strategy)
         await tagRevision(image, revision)
+        core.info('Created revision ' + revision + ' for image: ' + image)
         core.setOutput('revision', revision)
+    } else {
+        core.info('No revision created')
     }
 }
 
