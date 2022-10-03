@@ -110,7 +110,7 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
         return stdout.trim()
     } catch (e) {
         core.debug(`stderr: ${e.message}`)
-        return ''
+        throw e
     }
 }
 
