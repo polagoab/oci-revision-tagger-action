@@ -48,7 +48,7 @@ With the strategy outlined above, the revision tag will be treated as an immutab
 
 ### `digest`
 
-**Required** The digest of the given image or empty if the version did not exists before the build.
+The digest of the given image or empty if the version did not exists before the build.
 
 ### `strategy`
 

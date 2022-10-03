@@ -6,7 +6,7 @@ inputs:
     required: true
   digest:
     description: 'The digest of the given image or empty if the version did not exists before the build'
-    required: true
+    required: false
   strategy:
     description: 'The revision strategy to use. Valid strategies are alphabetical or numerical. Default is numerical.'
     required: false
