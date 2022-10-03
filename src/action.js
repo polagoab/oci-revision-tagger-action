@@ -88,14 +88,11 @@ async function revisionForImage(image, strategy) {
         const tags = result.Tags.filter(tag => tag.startsWith(version)).sort()
         if (tags.length === 0) {
             throw new Error("No version tag found for image: " + image)
-        } else {
-
-            return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
         }
-        return stdout.trim()
+        return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
     } catch (e) {
         core.debug(`stderr: ${e.message}`)
-        return ''
+        throw e
     }
 }
 
