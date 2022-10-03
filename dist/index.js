@@ -1090,8 +1090,9 @@ exports.context = new Context.Context();
  * @param     token    the repo PAT or GITHUB_TOKEN
  * @param     options  other options to set
  */
-function getOctokit(token, options) {
-    return new utils_1.GitHub(utils_1.getOctokitOptions(token, options));
+function getOctokit(token, options, ...additionalPlugins) {
+    const GitHubWithPlugins = utils_1.GitHub.plugin(...additionalPlugins);
+    return new GitHubWithPlugins(utils_1.getOctokitOptions(token, options));
 }
 exports.getOctokit = getOctokit;
 //# sourceMappingURL=github.js.map
@@ -9596,14 +9597,11 @@ async function revisionForImage(image, strategy) {
         const tags = result.Tags.filter(tag => tag.startsWith(version)).sort()
         if (tags.length === 0) {
             throw new Error("No version tag found for image: " + image)
-        } else {
-
-            return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
         }
-        return stdout.trim()
+        return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
     } catch (e) {
-        console.log(`stderr: ${e.message}`)
-        return ''
+        core.debug(`stderr: ${e.message}`)
+        throw e
     }
 }
 
@@ -9621,7 +9619,7 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
         return stdout.trim()
     } catch (e) {
         core.debug(`stderr: ${e.message}`)
-        return ''
+        throw e
     }
 }
 
@@ -9637,7 +9635,7 @@ async function action(image, digest, strategy, os, arch, variant) {
         core.info('Created revision ' + revision + ' for image: ' + image)
         core.setOutput('revision', revision)
     } else {
-        core.info('No new revision created')
+        core.info('No revision created')
     }
 }
 
