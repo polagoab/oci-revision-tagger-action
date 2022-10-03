@@ -53,7 +53,7 @@ describe(`Single image tests`, () => {
                 expect(command).toBe("docker buildx imagetools create " + image + " --tag " + revisionImage)
                 callback(null, { stdout: '' });
             } else {
-                fail("Unrecognized exec call: " + command)
+                throw new Error("Unrecognized exec call: " + command)
             }
         });
 
@@ -80,7 +80,7 @@ describe(`Single image tests`, () => {
                 expect(command).toBe("docker buildx imagetools create " + image + " --tag " + image + "-001")
                 callback(null, { stdout: '' });
             } else {
-                fail("Unrecognized exec call: " + command)
+                throw new Error("Unrecognized exec call: " + command)
             }
         });
 
@@ -107,7 +107,7 @@ describe(`Single image tests`, () => {
                 expect(command).toBe("docker buildx imagetools create " + image + " --tag " + image + "-01")
                 callback(null, { stdout: '' });
             } else {
-                fail("Unrecognized exec call: " + command)
+                throw new Error("Unrecognized exec call: " + command)
             }
         });
 
@@ -124,7 +124,7 @@ describe(`Single image tests`, () => {
             .setInputs({ image: image, digest: undefined })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
+            expect(command).toBe("skopeo inspec --format '{{.Digest}}' docker://" + image)
             callback(null, { stdout: '' });
         });
 
@@ -140,8 +140,12 @@ describe(`Single image tests`, () => {
             .setInputs({ image: image, digest: digest })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
-            callback(null, { stdout: digest });
+            if (command.includes('skopeo inspect')) {
+                expect(command).toBe("skopeo inspect --format '{{.Digest}}' docker://" + image)
+                callback(null, { stdout: digest });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
         });
 
         const result = await target.run(options)
@@ -168,7 +172,7 @@ describe(`Single image tests`, () => {
                 expect(command).toBe("docker buildx imagetools create " + image + " --tag " + revisionImage2)
                 callback(null, { stdout: '' });
             } else {
-                fail("Unrecognized exec call: " + command)
+                throw new Error("Unrecognized exec call: " + command)
             }
         });
 
@@ -182,11 +186,14 @@ describe(`Single image tests`, () => {
     test("Single image with os input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: image, os: 'linux' })
+            .setInputs({ image: image, digest: digest, os: 'linux' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-os=linux inspect --format '{{.Digest}}' docker://" + image)
-            callback(null, { stdout: digest });
+            if (command.includes('skopeo --override-os=linux inspect')) {
+                callback(null, { stdout: digest });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
         });
 
         const result = await target.run(options)
@@ -198,11 +205,14 @@ describe(`Single image tests`, () => {
     test("Single image with arch input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: image, arch: 'x86' })
+            .setInputs({ image: image, digest: digest, arch: 'x86' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-arch=x86 inspect --format '{{.Digest}}' docker://" + image)
-            callback(null, { stdout: digest });
+            if (command.includes('skopeo --override-arch=x86 inspect')) {
+                callback(null, { stdout: digest });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
         });
 
         const result = await target.run(options)
@@ -214,11 +224,14 @@ describe(`Single image tests`, () => {
     test("Single image with variant input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
-            .setInputs({ image: image, variant: 'v6' })
+            .setInputs({ image: image, digest: digest, variant: 'v6' })
 
         child_process.exec.mockImplementation((command, callback) => {
-            expect(command).toBe("skopeo --override-variant=v6 inspect --format '{{.Digest}}' docker://" + image)
-            callback(null, { stdout: digest });
+            if (command.includes('skopeo --override-variant=v6 inspect')) {
+                callback(null, { stdout: digest });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
         });
 
         const result = await target.run(options)
