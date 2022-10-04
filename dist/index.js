@@ -9628,11 +9628,16 @@ async function action(image, digest, strategy, os, arch, variant) {
     if (newDigest === '') {
         throw new Error("No existing digest found for image: " + image)
     }
+    core.info('Image: ' + image)
+    core.info('Existing digest: ' + digest)
+    core.info('New digest: ' + newDigest)
+
     core.setOutput('digest', newDigest)
+
     if (newDigest !== digest) {
         const revision = await revisionForImage(image, strategy)
         await tagRevision(image, revision)
-        core.info('Created revision ' + revision + ' for image: ' + image)
+        core.info('Created new revision: ' + revision)
         core.setOutput('revision', revision)
     } else {
         core.info('No revision created')
