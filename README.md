@@ -44,11 +44,11 @@ With the strategy outlined above, the revision tag will be treated as an immutab
 
 ### `image`
 
-**Required** The image to process.
+**Required** The image to process. If this input parameter is an array of images, all images will be processed
 
 ### `digest`
 
-The digest of the given image or empty if the version did not exists before the build.
+The digest of the given image or empty if the version did not exists before the build. When the input image is an array, the digest needs to be an array of the same size where each element matches the corresponding image entry.
 
 ### `strategy`
 
@@ -71,11 +71,11 @@ The VARIANT to use instead of the running architecture variant for choosing imag
 
 ### `revision`
 
-The new revision tag or empty if no new revision was created
+The new revision tag or empty if no new revision was created. If the input image and digest are arrays and at least one new revisions has been created, this output will be an array of the same size where each entry matches the corresponding image.
 
 ### `digest`
 
-The digest of the image
+The digest of the image. If the input image and digest are arrays, this output will be an array of the same size and each entry matches the corresponding image.
 
 ## Example usage for a single image
 
@@ -90,6 +90,27 @@ The digest of the image
 - name: Tag revision
   uses: polagoab/oci-revision-tagger-action@main
   with:
-    image: example-image:1.0.0
+    image: {{ steps.existing_digest.output.image }}
+    digest: ${{ steps.existing_digest.outputs.digest }}
+```
+
+## Example usage for multiple images
+
+```
+- name: Determine existing digests
+  id: existing_digest
+  uses: polagoab/oci-digest-action@main
+  with:
+    image: >-
+      [ 
+        "example-image:1.0.0", 
+        "other-example-image:1.0.0"
+      ]
+- name: Build images
+  run: ...
+- name: Tag revision
+  uses: polagoab/oci-revision-tagger-action@main
+  with:
+    image: {{ steps.existing_digest.output.image }}
     digest: ${{ steps.existing_digest.outputs.digest }}
 ```

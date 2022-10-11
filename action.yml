@@ -2,10 +2,13 @@ name: 'oci-revision-tagger-action'
 description: 'Github Action that adds a revision tag to images in a container registry'
 inputs:
   image:
-    description: 'The image to process'
+    description: 'The image to process. If this input parameter is an array of images, all images will be processed'
     required: true
   digest:
-    description: 'The digest of the given image or empty if the version did not exists before the build'
+    description: >
+      The digest of the given image or empty if the version did not exists before the build. When the input image is
+      an array, the digest needs to be an array of the same size where each element matches the corresponding image
+      entry.
     required: false
   strategy:
     description: 'The revision strategy to use. Valid strategies are alphabetical or numerical. Default is numerical.'
@@ -21,9 +24,14 @@ inputs:
     required: false
 outputs:
   revision:
-    description: 'The new revision tag or empty if no new revision was created'
+    description: >
+      The new revision tag or empty if no new revision was created. If the input image and digest are arrays and at
+      least one new revisions has been created, this output will be an array of the same size where each entry matches
+      the corresponding image.
   digest:
-    description: 'The digest of the image'
+    description: >
+      The digest of the image. If the input image and digest are arrays, this output will be an array of the same size
+      and each entry matches the corresponding image. 
 runs:
   using: 'node16'
   main: 'dist/index.js'
