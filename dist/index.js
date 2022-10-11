@@ -9547,14 +9547,14 @@ async function digestForImage(image, os, arch, variant) {
     cmd += " inspect --format '{{.Digest}}' "
     cmd += 'docker://' + image
 
-    core.debug('Using skopeo command: ' + cmd)
+    core.debug(`Using skopeo command: ${cmd}`)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`skopeo result: ${stdout}`)
+        core.debug(`skopeo result for image '${image}': ${stdout}`)
         return stdout.trim()
     } catch (e) {
-        core.debug(`stderr: ${e.message}`)
+        core.debug(`stderr for image '${image}': ${e.message}`)
         return ''
     }
 }
@@ -9587,11 +9587,11 @@ async function revisionForImage(image, strategy) {
     let cmd = 'skopeo list-tags '
     cmd += 'docker://' + plainImage
 
-    core.debug('Using skopeo command: ' + cmd)
+    core.debug(`Using skopeo command: ${cmd}`)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`skopeo result: ${stdout}`)
+        core.debug(`skopeo result for image '${image}': ${stdout}`)
 
         const result = JSON.parse(stdout)
         const tags = result.Tags.filter(tag => tag.startsWith(version)).sort()
@@ -9600,7 +9600,7 @@ async function revisionForImage(image, strategy) {
         }
         return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
     } catch (e) {
-        core.debug(`stderr: ${e.message}`)
+        core.debug(`stderr for image '${image}': ${e.message}`)
         throw e
     }
 }
@@ -9611,19 +9611,19 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
     cmd += image
     cmd += ' --tag ' + image.split(':')[0] + ':' + revision
 
-    core.debug('Using docker command: ' + cmd)
+    core.debug(`Using docker command for image '${image}': ${cmd}`)
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`docker result: ${stdout}`)
+        core.debug(`docker result for image '${image}': ${stdout}`)
         return stdout.trim()
     } catch (e) {
-        core.debug(`stderr: ${e.message}`)
+        core.debug(`stderr for image '${image}': ${e.message}`)
         throw e
     }
 }
 
-async function action(image, digest, strategy, os, arch, variant) {
+async function processSingleImage(image, digest, strategy, os, arch, variant) {
     const newDigest = await digestForImage(image, os, arch, variant)
     if (newDigest === '') {
         throw new Error("No existing digest found for image: " + image)
@@ -9644,20 +9644,89 @@ async function action(image, digest, strategy, os, arch, variant) {
     }
 }
 
-async function runAction() {
+async function processMultipleImages(images, digestString, strategy, os, arch, variant) {
+    let digests = []
+
     try {
-        const image = core.getInput('image');
+        if (digestString) {
+            digests = JSON.parse(digestString)
+        }
+    } catch (error) {
+        core.debug('Unable to parse digests as JSON: ' + error.message)
+    }
+
+    await Promise.all(images.map(async image => {
+        const newDigest = await digestForImage(image, os, arch, variant)
+        if (newDigest === '') {
+            throw new Error("No existing digest found for image: " + image)
+        }
+        const digest = digests[images.findIndex((element) => { return element === image })]
+        let revision
+
+        core.info('Image: ' + image)
+        core.info('Existing digest: ' + digest)
+        core.info('New digest: ' + newDigest)
+
+        if (newDigest !== digest) {
+            revision = await revisionForImage(image, strategy)
+            await tagRevision(image, revision)
+        }
+
+        return { revision: revision, image: image, newDigest: newDigest, existingDigest: digest }
+
+    })).then(result => {
+        const revisionsResult = []
+        const digestsResult = []
+
+        result.forEach((element) => {
+            revisionsResult.push(element.revision)
+            digestsResult.push(element.newDigest)
+
+            core.startGroup(element.image)
+            core.info('Existing digest: ' + element.existingDigest)
+            core.info('New digest: ' + element.newDigest)
+            if (element.newDigest !== element.existingDigest) {
+                core.info('Created new revision: ' + element.revision)
+            } else {
+                core.info('No revision created')
+            }
+            core.endGroup()
+        })
+
+        core.setOutput('digest', JSON.stringify(digestsResult))
+        if (!revisionsResult.every((value) => {
+            return typeof value === 'undefined'
+        })) {
+            core.setOutput('revision', JSON.stringify(revisionsResult))
+        }
+    })
+}
+
+async function action() {
+    try {
+        let image = core.getInput('image')
         const digest = core.getInput('digest');
         const strategy = core.getInput('strategy');
         const os = core.getInput('os');
         const arch = core.getInput('arch');
         const variant = core.getInput('variant');
-        await action(image, digest, strategy, os, arch, variant)
+
+        try {
+            image = JSON.parse(image)
+        } catch (error) {
+            core.debug('Unable to parse image as JSON: ' + error.message)
+        }
+
+        if (Array.isArray(image)) {
+            await processMultipleImages(image, digest, strategy, os, arch, variant)
+        } else {
+            await processSingleImage(image, digest, strategy, os, arch, variant)
+        }
     } catch (error) {
         core.setFailed(error.message);
     }
 }
-module.exports = runAction
+module.exports = action
 
 
 /***/ }),
