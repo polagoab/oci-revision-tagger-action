@@ -207,6 +207,54 @@ describe(`Single image tests`, () => {
         expect(result.commands.outputs.revision).toBe('1.0.0-3')
     })
 
+    test("Single image with dash in version", async () => {
+        const target = RunTarget.asyncFn(runAction);
+        const options = RunOptions.create()
+            .setInputs({ image: "unknown-image:1.0.0-branch", digest: undefined })
+
+        child_process.exec.mockImplementation((command, callback) => {
+            if (command.includes('skopeo inspect')) {
+                callback(null, { stdout: digest });
+            } else if (command.includes('skopeo list-tags')) {
+                callback(null, { stdout: JSON.stringify({ Tags: ['1.0.0-branch'] }) });
+            } else if (command.includes('docker buildx imagetools create')) {
+                callback(null, { stdout: '' });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
+        });
+
+        const result = await target.run(options)
+
+        expect(result.isSuccess).toBeTruthy()
+        expect(result.commands.outputs.digest).toBe(digest)
+        expect(result.commands.outputs.revision).toBe('1.0.0-branch-1')
+    })
+
+    test("Single image with dash in version and existing revision", async () => {
+        const target = RunTarget.asyncFn(runAction);
+        const options = RunOptions.create()
+            .setInputs({ image: "unknown-image:1.0.0-branch", digest: undefined })
+
+        child_process.exec.mockImplementation((command, callback) => {
+            if (command.includes('skopeo inspect')) {
+                callback(null, { stdout: digest });
+            } else if (command.includes('skopeo list-tags')) {
+                callback(null, { stdout: JSON.stringify({ Tags: ['1.0.0-branch', '1.0.0-branch-1'] }) });
+            } else if (command.includes('docker buildx imagetools create')) {
+                callback(null, { stdout: '' });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
+        });
+
+        const result = await target.run(options)
+
+        expect(result.isSuccess).toBeTruthy()
+        expect(result.commands.outputs.digest).toBe(digest)
+        expect(result.commands.outputs.revision).toBe('1.0.0-branch-2')
+    })
+
     test("Single image with os input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
