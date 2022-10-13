@@ -9663,10 +9663,6 @@ async function processMultipleImages(images, digestString, strategy, os, arch, v
         const digest = digests[images.findIndex((element) => { return element === image })]
         let revision
 
-        core.info('Image: ' + image)
-        core.info('Existing digest: ' + digest)
-        core.info('New digest: ' + newDigest)
-
         if (newDigest !== digest) {
             revision = await revisionForImage(image, strategy)
             await tagRevision(image, revision)
