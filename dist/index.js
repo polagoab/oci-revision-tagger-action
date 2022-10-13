@@ -9575,19 +9575,19 @@ function paddingFromStrategy(strategy) {
     throw new Error("Unrecognized strategy: " + strategy)
 }
 
-function revisionFromTag(tag) {
+function revisionFromTag(tag, version) {
     const revisionStart = tag.lastIndexOf('-')
-    if (revisionStart < 0) {
+    if (revisionStart < 0 || tag === version) {
         return 0
     }
     return tag.substring(revisionStart + 1)
 }
 
-function revisionFromTags(tags, strategy) {
+function revisionFromTags(tags, version, strategy) {
     let existingRevision = 0
     if (tags.length > 1) {
         existingRevision = tags.reduce((p, c) => {
-            return Math.max(revisionFromTag(p), revisionFromTag(c))
+            return Math.max(revisionFromTag(p, version), revisionFromTag(c, version))
         })
     }
 
@@ -9618,7 +9618,7 @@ async function revisionForImage(image, strategy) {
         if (tags.length === 0) {
             throw new Error("No version tag found for image: " + image)
         }
-        return version + '-' + revisionFromTags(tags, strategy)
+        return version + '-' + revisionFromTags(tags, version, strategy)
     } catch (e) {
         core.debug(`stderr for image '${image}': ${e.message}`)
         throw e
