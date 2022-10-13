@@ -67,6 +67,8 @@ function paddingFromStrategy(strategy) {
 }
 
 function revisionFromTag(tag, version) {
+    core.debug(`revisionFromTag(${tag}, ${version}`)
+    
     const revisionStart = tag.lastIndexOf('-')
     if (revisionStart < 0 || tag === version) {
         return 0
