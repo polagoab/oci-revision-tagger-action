@@ -68,7 +68,7 @@ function paddingFromStrategy(strategy) {
 
 function revisionFromTag(tag, version) {
     const revisionStart = tag.lastIndexOf('-')
-    if (!tag || revisionStart < 0 || tag === version) {
+    if (revisionStart < 0 || tag === version) {
         return 0
     }
     return tag.substring(revisionStart + 1)
