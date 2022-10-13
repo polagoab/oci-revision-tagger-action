@@ -66,6 +66,25 @@ function paddingFromStrategy(strategy) {
     throw new Error("Unrecognized strategy: " + strategy)
 }
 
+function revisionFromTag(tag) {
+    const revisionStart = tag.lastIndexOf('-')
+    if (revisionStart < 0) {
+        return 0
+    }
+    return tag.substring(revisionStart + 1)
+}
+
+function revisionFromTags(tags, strategy) {
+    let existingRevision = 0
+    if (tags.length > 1) {
+        existingRevision = tags.reduce((p, c) => {
+            return Math.max(revisionFromTag(p), revisionFromTag(c))
+        })
+    }
+
+    return String(existingRevision + 1).padStart(paddingFromStrategy(strategy), '0')
+}
+
 async function revisionForImage(image, strategy) {
     const parts = image.split(':')
     const plainImage = parts[0]
@@ -85,11 +104,12 @@ async function revisionForImage(image, strategy) {
         core.debug(`skopeo result for image '${image}': ${stdout}`)
 
         const result = JSON.parse(stdout)
-        const tags = result.Tags.filter(tag => tag.startsWith(version)).sort()
+
+        const tags = result.Tags.filter(tag => tag.startsWith(version))
         if (tags.length === 0) {
             throw new Error("No version tag found for image: " + image)
         }
-        return version + '-' + String(tags.length).padStart(paddingFromStrategy(strategy), '0')
+        return version + '-' + revisionFromTags(tags, strategy)
     } catch (e) {
         core.debug(`stderr for image '${image}': ${e.message}`)
         throw e

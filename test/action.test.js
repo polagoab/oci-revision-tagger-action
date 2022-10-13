@@ -183,6 +183,30 @@ describe(`Single image tests`, () => {
         expect(result.commands.outputs.revision).toBe(revision2)
     })
 
+    test("Single image with deleted revision", async () => {
+        const target = RunTarget.asyncFn(runAction);
+        const options = RunOptions.create()
+            .setInputs({ image: image, digest: undefined })
+
+        child_process.exec.mockImplementation((command, callback) => {
+            if (command.includes('skopeo inspect')) {
+                callback(null, { stdout: digest });
+            } else if (command.includes('skopeo list-tags')) {
+                callback(null, { stdout: JSON.stringify({ Tags: ['1.0.0', '1.0.0-2'] }) });
+            } else if (command.includes('docker buildx imagetools create')) {
+                callback(null, { stdout: '' });
+            } else {
+                throw new Error("Unrecognized exec call: " + command)
+            }
+        });
+
+        const result = await target.run(options)
+
+        expect(result.isSuccess).toBeTruthy()
+        expect(result.commands.outputs.digest).toBe(digest)
+        expect(result.commands.outputs.revision).toBe('1.0.0-3')
+    })
+
     test("Single image with os input", async () => {
         const target = RunTarget.asyncFn(runAction);
         const options = RunOptions.create()
@@ -357,7 +381,7 @@ describe(`Multiple images tests`, () => {
         const result = await target.run(options)
 
         expect(result.isSuccess).toBeTruthy()
-        
+
         const revisions = JSON.parse(result.commands.outputs.revision)
         expect(revisions.length).toBe(2)
         expect(revisions[0]).toBeNull()
