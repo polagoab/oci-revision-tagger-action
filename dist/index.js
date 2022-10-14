@@ -9697,6 +9697,7 @@ async function processMultipleImages(images, digestString, strategy, os, arch, v
     })).then(result => {
         const revisionsResult = []
         const digestsResult = []
+        let revisionCount = 0
 
         result.forEach((element) => {
             revisionsResult.push(element.revision)
@@ -9707,6 +9708,7 @@ async function processMultipleImages(images, digestString, strategy, os, arch, v
             core.info('New digest: ' + element.newDigest)
             if (element.newDigest !== element.existingDigest) {
                 core.info('Created new revision: ' + element.revision)
+                revisionCount++
             } else {
                 core.info('No revision created')
             }
@@ -9718,6 +9720,11 @@ async function processMultipleImages(images, digestString, strategy, os, arch, v
             return typeof value === 'undefined'
         })) {
             core.setOutput('revision', JSON.stringify(revisionsResult))
+        }
+        if (revisionCount > 0) {
+            core.info(`Creating ${revisionCount} new revision(s) (from ${result.length} candidates)`)
+        } else {
+            core.info('No revisions created (from ${result.length} candidates)')
         }
     })
 }
