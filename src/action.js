@@ -213,9 +213,9 @@ async function processMultipleImages(images, digestString, strategy, os, arch, v
             core.setOutput('revision', JSON.stringify(revisionsResult))
         }
         if (revisionCount > 0) {
-            core.info(`Created ${revisionCount} new revision(s) (from ${result.length} candidates)`)
+            core.info(`Created ${revisionCount} new revision(s) from ${result.length} candidates`)
         } else {
-            core.info('No revisions created (from ${result.length} candidates)')
+            core.info(`No revisions created from ${result.length} candidates`)
         }
     })
 }
