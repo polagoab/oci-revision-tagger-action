@@ -34,6 +34,10 @@ async function digestForImage(image, os, arch, variant) {
         cmd += ' --override-variant=' + variant;
     }
 
+    if (core.isDebug()) {
+        cms += ' --debug'
+    }
+
     // TODO add --no-tags when the option is available in the runner
     cmd += " inspect --format '{{.Digest}}' "
     cmd += 'docker://' + image
@@ -98,8 +102,13 @@ async function revisionForImage(image, strategy) {
         throw new Error("No version specified in image: " + image)
     }
 
-    let cmd = 'skopeo list-tags '
-    cmd += 'docker://' + plainImage
+    let cmd = 'skopeo'
+
+    if (core.isDebug()) {
+        cms += ' --debug'
+    }
+
+    cmd += ' list-tags docker://' + plainImage
 
     core.debug(`Using skopeo list-tags command: ${cmd}`)
 
@@ -122,7 +131,13 @@ async function revisionForImage(image, strategy) {
 
 async function tagRevision(image, revision, digest, os, arch, variant) {
     core.debug(`tagging image ${image} with revision ${revision}`)
-    let cmd = 'docker buildx imagetools create '
+    let cmd = 'docker'
+
+    if (core.isDebug()) {
+        cms += ' --debug'
+    }
+
+    cms += ' buildx imagetools create '
     cmd += image
     cmd += ' --tag ' + image.split(':')[0] + ':' + revision
 
