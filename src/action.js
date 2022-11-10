@@ -35,7 +35,7 @@ async function digestForImage(image, os, arch, variant) {
     }
 
     if (core.isDebug()) {
-        cms += ' --debug'
+        cmd += ' --debug'
     }
 
     // TODO add --no-tags when the option is available in the runner
@@ -105,7 +105,7 @@ async function revisionForImage(image, strategy) {
     let cmd = 'skopeo'
 
     if (core.isDebug()) {
-        cms += ' --debug'
+        cmd += ' --debug'
     }
 
     cmd += ' list-tags docker://' + plainImage
@@ -134,10 +134,10 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
     let cmd = 'docker'
 
     if (core.isDebug()) {
-        cms += ' --debug'
+        cmd += ' --debug'
     }
 
-    cms += ' buildx imagetools create '
+    cmd += ' buildx imagetools create '
     cmd += image
     cmd += ' --tag ' + image.split(':')[0] + ':' + revision
 
