@@ -23,6 +23,11 @@ const exec = util.promisify(require('child_process').exec);
 
 async function digestForImage(image, os, arch, variant) {
     let cmd = 'skopeo'
+
+    if (core.isDebug()) {
+        cmd += ' --debug'
+    }
+
     if (os) {
         cmd += ' --override-os=' + os;
     }
@@ -32,10 +37,6 @@ async function digestForImage(image, os, arch, variant) {
 
     if (variant) {
         cmd += ' --override-variant=' + variant;
-    }
-
-    if (core.isDebug()) {
-        cmd += ' --debug'
     }
 
     // TODO add --no-tags when the option is available in the runner
