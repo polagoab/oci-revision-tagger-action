@@ -9555,7 +9555,8 @@ async function digestForImage(image, os, arch, variant) {
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`skopeo inspect result for image '${image}': ${stdout}`)
+        core.debug(`skopeo inspect stdout result for image '${image}': ${stdout}`)
+        core.debug(`skopeo inspect stderr result for image '${image}': ${stderr}`)
         return stdout.trim()
     } catch (e) {
         core.debug(`skopeo inspect stderr for image '${image}': ${e.message}`)
@@ -9623,7 +9624,8 @@ async function revisionForImage(image, strategy) {
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`skopeo list-tags result for image '${image}': ${stdout}`)
+        core.debug(`skopeo list-tags stdout result for image '${image}': ${stdout}`)
+        core.debug(`skopeo list-tags stderr result for image '${image}': ${stderr}`)
 
         const result = JSON.parse(stdout)
 
@@ -9654,7 +9656,8 @@ async function tagRevision(image, revision, digest, os, arch, variant) {
 
     try {
         const { stdout, stderr } = await exec(cmd)
-        core.debug(`docker buildx imagetools create result for image '${image}': ${stdout}`)
+        core.debug(`docker buildx imagetools create stdout result for image '${image}': ${stdout}`)
+        core.debug(`docker buildx imagetools create stderr result for image '${image}': ${stderr}`)
         return stdout.trim()
     } catch (e) {
         core.debug(`docker buildx imagetools create stderr for image '${image}': ${e.message}`)
