@@ -9532,6 +9532,11 @@ const exec = util.promisify((__nccwpck_require__(2081).exec));
 
 async function digestForImage(image, os, arch, variant) {
     let cmd = 'skopeo'
+
+    if (core.isDebug()) {
+        cmd += ' --debug'
+    }
+
     if (os) {
         cmd += ' --override-os=' + os;
     }
@@ -9541,10 +9546,6 @@ async function digestForImage(image, os, arch, variant) {
 
     if (variant) {
         cmd += ' --override-variant=' + variant;
-    }
-
-    if (core.isDebug()) {
-        cmd += ' --debug'
     }
 
     // TODO add --no-tags when the option is available in the runner
