@@ -22,7 +22,7 @@ jobs:
         run: npm run-script test
       - name: Build distribution
         run: npm run-script build
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           repository: ./dist
           commit_message: Update distribution dir
