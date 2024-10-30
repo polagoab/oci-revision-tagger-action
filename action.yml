@@ -33,5 +33,5 @@ outputs:
       The digest of the image. If the input image and digest are arrays, this output will be an array of the same size
       and each entry matches the corresponding image. 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
