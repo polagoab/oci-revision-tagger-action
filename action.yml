@@ -6,9 +6,8 @@ inputs:
     required: true
   digest:
     description: >
-      The digest of the given image or empty if the version did not exists before the build. When the input image is
-      an array, the digest needs to be an array of the same size where each element matches the corresponding image
-      entry.
+      The digest of the given image or empty if the version did not exists before the build. When the input image is an
+      array, the digest needs to be an array of the same size where each element matches the corresponding image entry.
     required: false
   strategy:
     description: 'The revision strategy to use. Valid strategies are alphabetical or numerical. Default is numerical.'
@@ -33,5 +32,5 @@ outputs:
       The digest of the image. If the input image and digest are arrays, this output will be an array of the same size
       and each entry matches the corresponding image. 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
