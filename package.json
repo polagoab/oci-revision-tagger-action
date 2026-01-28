@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/polagoab/oci-digest-action#readme",
   "dependencies": {
-    "@actions/core": "^2.0.2",
+    "@actions/core": "^2.0.3",
     "@actions/github": "^7.0.0",
     "github-action-ts-run-api": "^3.0.4"
   },
